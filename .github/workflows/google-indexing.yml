@@ -1,0 +1,54 @@
+# sitemap.xml이 갱신될 때마다 구글에 자동 통보.
+#  1) 서치콘솔 Sitemaps API로 sitemap 제출 — 폐기된 google.com/ping의 공식 대체 (정책 안전)
+#  2) Indexing API로 전체 URL 통보 — 구글 정책상 채용공고·라이브방송 페이지 전용이므로
+#     일반 페이지 사용은 자기 책임 (계정 제재 사례 있음). 원치 않으면 해당 step 삭제.
+#
+# 사전 준비: 저장소 Settings → Secrets → Actions 에
+#   GOOGLE_SERVICE_ACCOUNT_JSON = 서비스 계정 JSON 키 전문
+# 을 등록해야 동작한다. 미등록 시 워크플로우는 조용히 건너뛴다.
+name: Google indexing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "sitemap.xml"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    env:
+      SA_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check service account secret
+        id: check
+        run: |
+          if [ -n "$SA_JSON" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "GOOGLE_SERVICE_ACCOUNT_JSON 시크릿이 없어 건너뜁니다."
+          fi
+
+      - name: Install google-auth
+        if: steps.check.outputs.ok == 'true'
+        run: pip install --quiet google-auth requests
+
+      - name: Write service account key
+        if: steps.check.outputs.ok == 'true'
+        run: printf '%s' "$SA_JSON" > service_account.json
+
+      - name: Wait for Cloudflare Pages deploy
+        if: steps.check.outputs.ok == 'true'
+        run: sleep 90
+
+      - name: Submit sitemap to Search Console
+        if: steps.check.outputs.ok == 'true'
+        run: python3 gsc_sitemap_submit.py
+
+      - name: Notify Google Indexing API (전체 URL)
+        if: steps.check.outputs.ok == 'true'
+        continue-on-error: true
+        run: python3 google_indexing.py --all

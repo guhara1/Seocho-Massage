@@ -2,50 +2,50 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>간다GO 매거진</title>
-  <link>https://seocho-massage.example.com/magazine/</link>
+  <link>https://seocho-massage.pages.dev/magazine/</link>
   <description>서초 방문 관리 이용 가이드와 휴식·컨디션 관리 정보</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 12 Jun 2026 20:34:30 +0900</lastBuildDate>
-  <atom:link href="https://seocho-massage.example.com/rss.xml" rel="self" type="application/rss+xml"/>
+  <lastBuildDate>Fri, 12 Jun 2026 20:38:42 +0900</lastBuildDate>
+  <atom:link href="https://seocho-massage.pages.dev/rss.xml" rel="self" type="application/rss+xml"/>
   <item>
     <title>아로마테라피 vs 스웨디시, 차이와 고르는 기준</title>
-    <link>https://seocho-massage.example.com/magazine/aroma-vs-swedish/</link>
-    <guid isPermaLink="true">https://seocho-massage.example.com/magazine/aroma-vs-swedish/</guid>
+    <link>https://seocho-massage.pages.dev/magazine/aroma-vs-swedish/</link>
+    <guid isPermaLink="true">https://seocho-massage.pages.dev/magazine/aroma-vs-swedish/</guid>
     <description>아로마테라피와 스웨디시는 둘 다 오일 관리지만 목적이 다릅니다. 압의 깊이, 향의 역할, 받은 뒤의 상태 세 기준으로 비교하고 고르는 법을 정리했습니다.</description>
     <pubDate>Mon, 08 Jun 2026 09:00:00 +0900</pubDate>
   </item>
   <item>
     <title>사무직 목·어깨 결림, 하루 종일 앉아 일하는 사람의 관리법</title>
-    <link>https://seocho-massage.example.com/magazine/desk-worker-care/</link>
-    <guid isPermaLink="true">https://seocho-massage.example.com/magazine/desk-worker-care/</guid>
+    <link>https://seocho-massage.pages.dev/magazine/desk-worker-care/</link>
+    <guid isPermaLink="true">https://seocho-massage.pages.dev/magazine/desk-worker-care/</guid>
     <description>하루 8시간 이상 모니터 앞에 앉는 사무직의 목·어깨 결림 관리법입니다. 근무 중 틈새 동작, 퇴근 후 셀프 관리의 한계, 전문 관리를 부를 기준을 정리했습니다.</description>
     <pubDate>Fri, 29 May 2026 09:00:00 +0900</pubDate>
   </item>
   <item>
     <title>호텔·숙소에서 방문 마사지 받을 때 알아둘 것</title>
-    <link>https://seocho-massage.example.com/magazine/hotel-stay-massage/</link>
-    <guid isPermaLink="true">https://seocho-massage.example.com/magazine/hotel-stay-massage/</guid>
+    <link>https://seocho-massage.pages.dev/magazine/hotel-stay-massage/</link>
+    <guid isPermaLink="true">https://seocho-massage.pages.dev/magazine/hotel-stay-massage/</guid>
     <description>고속터미널·강남역 인근 호텔이나 숙소에서 방문 마사지를 받는 방법입니다. 객실 안내 요령, 시간대 선택, 객실 준비, 받기 어려운 상태까지 순서대로 정리했습니다.</description>
     <pubDate>Wed, 20 May 2026 09:00:00 +0900</pubDate>
   </item>
   <item>
     <title>등산 후 근육통, 언제 어떻게 풀어야 할까</title>
-    <link>https://seocho-massage.example.com/magazine/hiking-recovery/</link>
-    <guid isPermaLink="true">https://seocho-massage.example.com/magazine/hiking-recovery/</guid>
+    <link>https://seocho-massage.pages.dev/magazine/hiking-recovery/</link>
+    <guid isPermaLink="true">https://seocho-massage.pages.dev/magazine/hiking-recovery/</guid>
     <description>청계산·우면산을 다녀온 뒤의 근육통, 풀어야 할 시점과 방법을 시간 순서로 정리했습니다. 하산 직후 할 일, 당일 밤 관리, 지연성 근육통 대처와 병원이 먼저인 신호까지.</description>
     <pubDate>Mon, 11 May 2026 09:00:00 +0900</pubDate>
   </item>
   <item>
     <title>둘이 함께 받는 커플 방문 관리, 준비와 진행 순서</title>
-    <link>https://seocho-massage.example.com/magazine/couple-home-massage/</link>
-    <guid isPermaLink="true">https://seocho-massage.example.com/magazine/couple-home-massage/</guid>
+    <link>https://seocho-massage.pages.dev/magazine/couple-home-massage/</link>
+    <guid isPermaLink="true">https://seocho-massage.pages.dev/magazine/couple-home-massage/</guid>
     <description>둘이 함께 받는 커플 방문 관리의 모든 것. 동시 진행과 순차 진행의 차이, 예약 때 정할 사항, 공간 준비, 당일 진행 순서와 서비스 범위 기준까지 단계별로 안내합니다.</description>
     <pubDate>Fri, 01 May 2026 09:00:00 +0900</pubDate>
   </item>
   <item>
     <title>홈타이 받기 전 공간 준비 체크리스트</title>
-    <link>https://seocho-massage.example.com/magazine/home-thai-prep/</link>
-    <guid isPermaLink="true">https://seocho-massage.example.com/magazine/home-thai-prep/</guid>
+    <link>https://seocho-massage.pages.dev/magazine/home-thai-prep/</link>
+    <guid isPermaLink="true">https://seocho-massage.pages.dev/magazine/home-thai-prep/</guid>
     <description>집에서 홈타이를 받기 전 무엇을 준비해야 할까요. 매트 자리, 복장, 온도와 조명, 공동현관 안내, 반려동물 동선까지 방문 전 10분 안에 끝나는 체크리스트로 정리했습니다.</description>
     <pubDate>Wed, 22 Apr 2026 09:00:00 +0900</pubDate>
   </item>
