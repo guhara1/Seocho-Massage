@@ -125,6 +125,11 @@ def render_page(page: dict) -> str:
         else '<meta name="robots" content="index,follow">'
     )
     canonical = BASE_URL.rstrip("/") + "/" + path
+    naver_verify = (
+        '<meta name="naver-site-verification" content="df5bec35098ab32a0966a642b5bf46eda1c37dcf">\n'
+        if path == ""
+        else ""
+    )
 
     # 히어로가 있는 페이지(메인)는 H1을 히어로 안에서 출력한다.
     if hero:
@@ -145,7 +150,7 @@ def render_page(page: dict) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-{robots}
+{naver_verify}{robots}
 <link rel="canonical" href="{canonical}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{title}">
