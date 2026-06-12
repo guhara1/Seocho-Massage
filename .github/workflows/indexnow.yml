@@ -1,0 +1,19 @@
+# 푸시(배포)될 때마다 빙·네이버 등 IndexNow 참여 엔진에 자동으로 색인 통보.
+# 키 파일(<키>.txt)이 사이트에 함께 배포되므로 별도 시크릿이 필요 없다.
+name: IndexNow ping
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "sitemap.xml"
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for Cloudflare Pages deploy
+        run: sleep 90
+      - name: Notify IndexNow (Bing·Naver 등)
+        run: python3 indexnow_ping.py --all
