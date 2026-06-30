@@ -1,73 +1,7 @@
 # 메인 페이지 — 허브 역할. 모든 키워드를 밀어 넣지 않고 상세 페이지로 연결한다.
-from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY
+# 비즈니스(LocalBusiness)·FAQ·빵부스러기 스키마는 build.py 가 전 페이지 공통으로 주입한다.
+from .site import BRAND, PHONE, PHONE_DISPLAY
 from .pricing import PRICING
-
-_JSONLD = f"""<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "HealthAndBeautyBusiness",
-  "name": "{BRAND}",
-  "telephone": "{PHONE}",
-  "url": "{BASE_URL}/",
-  "image": "{BASE_URL}/assets/og-image.png",
-  "description": "서초구 전지역 방문 출장마사지·홈타이 예약 안내",
-  "areaServed": {{
-    "@type": "AdministrativeArea",
-    "name": "서울특별시 서초구"
-  }},
-  "openingHours": "Mo-Su 00:00-24:00",
-  "priceRange": "₩90,000 - ₩180,000"
-}}
-</script>
-<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {{
-      "@type": "Question",
-      "name": "서초구 전지역 방문이 가능한가요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "예약 시간, 정확한 위치, 배정 상황에 따라 가능 여부가 달라집니다. 지역별 안내 페이지에서 서초동, 잠원동, 반포동, 방배동, 양재동, 내곡동 대표 동 기준으로 확인할 수 있습니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "강남역이나 고속터미널역 근처도 가능한가요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "주요 역세권은 역 상세 페이지에서 주변 생활권과 함께 안내합니다. 정확한 가능 여부는 예약 시 위치를 기준으로 확인합니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "서초1동과 서초2동은 왜 따로 없나요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "서초1동부터 서초4동까지는 서초동 대표 페이지에서 통합 안내하여 중복 페이지 위험을 줄입니다. 반포·방배·양재의 숫자 행정동도 같은 기준입니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "당일 예약도 가능한가요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "가능할 수 있지만 저녁 시간대와 주말은 문의가 많을 수 있어 사전 예약을 권장합니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "테마별 관리는 어디에서 확인하나요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "스웨디시, 타이마사지, 홈케어 등 테마별 안내 페이지에서 특징과 추천 대상을 확인할 수 있습니다."
-      }}
-    }}
-  ]
-}}
-</script>
-"""
 
 _HERO = f"""<section class="hero">
   <div class="hero-inner">
@@ -100,17 +34,17 @@ _BODY = f"""
 </section>
 
 <section id="areas">
-<h2>지역별 안내</h2>
-<p>법조타운과 오피스가 모인 서초동, 한강변 아파트 단지의 잠원동, 터미널과 호텔이 있는 반포동, 조용한 주택가의 방배동, 기업 사옥이 모인 양재동, 청계산 자락의 내곡동 — 각 페이지에서 동별 특징과 방문 조건을 고유하게 설명합니다.</p>
-<ul class="card-grid">
-<li><a href="/seocho-gu/seocho-dong/">서초동</a></li>
-<li><a href="/seocho-gu/jamwon-dong/">잠원동</a></li>
-<li><a href="/seocho-gu/banpo-dong/">반포동</a></li>
-<li><a href="/seocho-gu/bangbae-dong/">방배동</a></li>
-<li><a href="/seocho-gu/yangjae-dong/">양재동</a></li>
-<li><a href="/seocho-gu/naegok-dong/">내곡동</a></li>
-</ul>
-<p>서초구 전체 구조가 궁금하시면 <a href="/seocho-gu/">서초구 전체 안내</a>에서 한눈에 확인하실 수 있습니다.</p>
+<h2>지역별 안내 — 동별 롱테일 주제로 바로가기</h2>
+<p>법조타운과 오피스가 모인 서초동, 한강변 아파트 단지의 잠원동, 터미널과 호텔이 있는 반포동, 조용한 주택가의 방배동, 기업 사옥이 모인 양재동, 청계산 자락의 내곡동 — 각 페이지에서 동별 특징과 방문 조건을 고유하게 설명합니다. 자주 찾는 상황별 주제로 바로 들어가실 수 있도록 정리했습니다.</p>
+<div class="longtail-grid">
+<a href="/seocho-gu/seocho-dong/"><strong>서초동 법조타운·강남대로 심야 출장마사지</strong><span>야근·법원 인근 호텔 방문 조건</span></a>
+<a href="/seocho-gu/jamwon-dong/"><strong>잠원동 한강변 운동 후 회복 홈타이</strong><span>러닝·라이딩 후 하체 회복 안내</span></a>
+<a href="/seocho-gu/banpo-dong/"><strong>반포동 고속터미널·호텔 출장 홈타이</strong><span>터미널·호텔 객실 방문 안내</span></a>
+<a href="/seocho-gu/bangbae-dong/"><strong>방배동 주택가 정기 방문 마사지</strong><span>단독·빌라 정기 방문 안내</span></a>
+<a href="/seocho-gu/yangjae-dong/"><strong>양재동 기업 사옥·야근 후 출장마사지</strong><span>사옥·출장 숙소 야간 방문</span></a>
+<a href="/seocho-gu/naegok-dong/"><strong>내곡동 청계산 등산 후 회복 마사지</strong><span>신축 단지·산행 회복 안내</span></a>
+</div>
+<p>서초구 전체 구조가 궁금하시면 <a href="/seocho-gu/">서초구 전체 안내</a>, 역으로 찾으시면 <a href="/seocho-gu/stations/">지하철역별 안내</a>, 관리 유형은 <a href="/themes/">테마별 안내</a>에서 확인하실 수 있습니다.</p>
 </section>
 
 <section id="stations">
@@ -220,7 +154,6 @@ PAGE = {
     "desc": "서초 출장마사지·홈타이 안내. 서초동·반포동·방배동·양재동과 주요 지하철역 인근 방문 관리, 테마별 코스, 예약 정보를 확인하세요.",
     "h1": "서초 출장마사지·홈타이 예약 안내",
     "body": _BODY,
-    "extra_head": _JSONLD,
     "breadcrumb": [],
     "hero": _HERO,
 }

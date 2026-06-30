@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Wait for Cloudflare Pages deploy
+      - name: Wait for Netlify deploy
         run: sleep 90
       - name: Notify IndexNow (Bing·Naver 등)
         run: python3 indexnow_ping.py --all

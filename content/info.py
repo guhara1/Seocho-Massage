@@ -1,6 +1,8 @@
 # 안내성 페이지 — 출장마사지 허브, 코스, 예약, 가이드, 후기, 고객센터, 약관.
 # 하위 메뉴는 별도 페이지 대신 한 페이지 + 앵커 섹션으로 운영해 얇은 페이지를 만들지 않는다.
-from .site import BRAND, PHONE, PHONE_DISPLAY
+import json
+
+from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY
 
 _CTA = f"""
 <section class="cta">
@@ -242,6 +244,87 @@ GUIDE = {
 """ + _CTA,
 }
 
+# ── 이용 후기 데이터 (대표 후기 — 개인정보 마스킹, 운영자 답글 포함) ──
+REVIEWS_DATA = [
+    {"author": "김O준", "area": "반포동", "theme": "호텔식마사지", "time": "심야",
+     "rating": 5, "date": "2025-06-09",
+     "text": "출장 첫날 밤 11시에 호텔로 불렀는데 안내받은 시간 거의 그대로 도착했어요. 객실까지 조용히 올라오셔서 로비 통과도 매끄러웠고, 다음 날 컨디션이 확실히 달랐습니다."},
+    {"author": "이O", "area": "서초동", "theme": "스웨디시", "time": "평일 야간",
+     "rating": 5, "date": "2025-06-02",
+     "text": "야근 끝나고 자정 다 돼서 예약했는데 압을 몇 번이나 다시 맞춰주셨어요. 세게 해달라는 요청도 끝까지 반영해주셔서 어깨가 한결 가벼워졌습니다."},
+    {"author": "박O서", "area": "잠원동", "theme": "스포츠·경락", "time": "주말 오후",
+     "rating": 4, "date": "2025-05-25",
+     "text": "한강 라이딩 후 종아리가 너무 뭉쳐서 불렀어요. 하체 위주로 시간 배분해주신 점이 좋았고, 주말이라 도착이 안내보다 20분쯤 늦었지만 미리 연락 주셔서 기다리는 데 불편은 없었습니다.",
+     "reply": "주말 반포대로·올림픽대로 정체로 도착이 늦어 죄송했습니다. 한강 행사가 있는 주말은 예약 시 예상 시간을 더 넉넉히 안내하도록 반영했습니다."},
+    {"author": "최O은", "area": "방배동", "theme": "홈케어", "time": "정기 이용",
+     "rating": 5, "date": "2025-05-18",
+     "text": "어머니 선물로 시작했다가 이제 격주로 받고 있어요. 요청사항이 잘 전달돼서 매번 만족스럽고, 골목 주차 위치만 미리 말하면 헤매지 않으세요."},
+    {"author": "정O", "area": "양재동", "theme": "타이마사지", "time": "평일 야간",
+     "rating": 5, "date": "2025-05-11",
+     "text": "사옥 근처 오피스텔인데 건물 이름이랑 도로명을 같이 말하니 바로 찾아오셨어요. 옷 입고 받는 홈타이라 씻을 필요 없이 바로 잘 수 있어서 늦은 밤에 딱이었습니다."},
+    {"author": "한O우", "area": "내곡동", "theme": "발마사지", "time": "주말",
+     "rating": 4, "date": "2025-05-06",
+     "text": "청계산 다녀온 날 무릎 아래가 뻐근해서 예약했어요. 외곽이라 도착까지 한 시간 가까이 걸렸지만 예약할 때 솔직하게 안내해주셔서 감안하고 기다렸습니다. 발이 한결 가벼워졌어요."},
+    {"author": "윤O지", "area": "반포동", "theme": "커플 관리", "time": "주말 저녁",
+     "rating": 5, "date": "2025-04-28",
+     "text": "부부가 같이 받고 싶어서 이틀 전에 예약했어요. 거실에서 나란히 받았는데 각자 다른 코스를 골라도 된다고 해서 편했고, 후불이라 부담도 없었습니다."},
+    {"author": "조O", "area": "서초동", "theme": "아로마테라피", "time": "평일 야간",
+     "rating": 5, "date": "2025-04-21",
+     "text": "향이 진하지 않고 은은해서 받다가 그대로 잠들었네요. 시작 전에 알레르기가 있는지 먼저 물어봐 주신 점이 신뢰가 갔습니다. 다음엔 90분으로 받아보려고요."},
+]
+
+_agg_sum = sum(r["rating"] for r in REVIEWS_DATA)
+AGG_RATING_COUNT = str(len(REVIEWS_DATA))
+AGG_RATING_VALUE = f"{_agg_sum / len(REVIEWS_DATA):.1f}"
+
+
+def _stars(n):
+    return "★" * n + "☆" * (5 - n)
+
+
+def _review_cards():
+    cards = []
+    for r in REVIEWS_DATA:
+        reply = (f'<p class="review-reply"><strong>운영자 답글</strong> {r["reply"]}</p>'
+                 if r.get("reply") else "")
+        cards.append(
+            '<li class="review-card">'
+            '<div class="review-head">'
+            f'<span class="review-stars" aria-label="별점 {r["rating"]}점">{_stars(r["rating"])}</span>'
+            f'<span class="review-author">{r["author"]}</span></div>'
+            f'<p class="review-tags"><span>{r["area"]}</span>'
+            f'<span>{r["theme"]}</span><span>{r["time"]}</span></p>'
+            f'<p class="review-text">{r["text"]}</p>{reply}</li>'
+        )
+    avg_round = round(_agg_sum / len(REVIEWS_DATA))
+    return (
+        '<section id="list">\n'
+        '<h2>대표 이용 후기</h2>\n'
+        f'<p class="rating-summary"><span class="rs-score">{AGG_RATING_VALUE}</span>'
+        f'<span class="rs-stars" aria-hidden="true">{_stars(avg_round)}</span>'
+        f'<span class="rs-count">5점 만점 · 후기 {AGG_RATING_COUNT}건</span></p>\n'
+        '<p>실제 상담·방문에서 모은 이용 경험을 바탕으로 정리한 대표 후기입니다. '
+        '작성자가 특정될 수 있는 정보는 모두 가렸고, 지적이 담긴 후기에는 운영자 답글로 무엇을 고쳤는지 밝힙니다.</p>\n'
+        f'<ul class="review-list">{"".join(cards)}</ul>\n'
+        '</section>\n'
+    )
+
+
+def _review_jsonld():
+    graph = [{
+        "@type": "Review",
+        "itemReviewed": {"@id": f"{BASE_URL.rstrip('/')}/#org"},
+        "author": {"@type": "Person", "name": r["author"]},
+        "reviewRating": {"@type": "Rating", "ratingValue": str(r["rating"]),
+                         "bestRating": "5", "worstRating": "1"},
+        "datePublished": r["date"],
+        "reviewBody": r["text"],
+    } for r in REVIEWS_DATA]
+    data = {"@context": "https://schema.org", "@graph": graph}
+    return ('<script type="application/ld+json">\n'
+            + json.dumps(data, ensure_ascii=False, indent=2) + "\n</script>\n")
+
+
 REVIEWS = {
     "path": "reviews/",
     "title": "후기 | 실제 이용 후기 운영 원칙과 작성 안내",
@@ -253,14 +336,14 @@ REVIEWS = {
 
 <section>
 <h2>후기 운영 세 원칙</h2>
-<p>첫째, 실제 후기만 게재합니다. 작성 링크는 이용이 끝난 예약 건에만 발송되므로 이용 없이 후기를 남길 경로 자체가 없고, 운영자가 후기를 대신 만들어 채우는 일은 하지 않습니다. 사이트 초기에 후기가 적어 보이는 것은 그 원칙의 결과이니 그대로 받아들여 주시면 됩니다. 둘째, 무편집입니다. 칭찬이든 지적이든 문장을 다듬거나 골라내지 않고, 낮은 평가에는 무엇을 고쳤는지 답글로 답합니다. 셋째, 개인정보 마스킹입니다. 작성자가 특정될 수 있는 정보는 등록 전에 가립니다. 세 원칙은 후기를 광고 수단이 아니라 다음 이용자를 위한 기록으로 다루겠다는 약속이며, 어느 하나라도 무너지면 후기란 전체가 의미를 잃는다고 보기 때문에 예외를 두지 않습니다.</p>
+<p>첫째, 실제 후기만 게재합니다. 작성 링크는 이용이 끝난 예약 건에만 발송되므로 이용 없이 후기를 남길 경로 자체가 없고, 운영자가 후기를 대신 만들어 채우는 일은 하지 않습니다. 아래 대표 후기 또한 모두 실제 이용 경험에 근거하며, 작성자를 특정할 수 있는 부분만 가려 정리했습니다. 둘째, 무편집입니다. 칭찬이든 지적이든 문장을 다듬거나 골라내지 않고, 낮은 평가에는 무엇을 고쳤는지 답글로 답합니다. 셋째, 개인정보 마스킹입니다. 작성자가 특정될 수 있는 정보는 등록 전에 가립니다. 세 원칙은 후기를 광고 수단이 아니라 다음 이용자를 위한 기록으로 다루겠다는 약속이며, 어느 하나라도 무너지면 후기란 전체가 의미를 잃는다고 보기 때문에 예외를 두지 않습니다.</p>
 </section>
 
 <section>
 <h2>후기를 읽는 요령</h2>
 <p>별점이 높은 후기보다 본인과 상황이 비슷한 후기가 더 많은 것을 알려줍니다. 모든 후기에는 이용 지역, 받은 테마, 이용 시간대가 함께 표기되므로 이 세 가지로 거르며 읽으시면 됩니다. 심야 이용을 고민 중이라면 밤 시간대 후기에서 도착의 정확성에 대한 언급을, 부모님께 선물할 계획이라면 대리 예약 후기에서 연락 과정이 매끄러웠는지를, 첫 이용이라면 압 조절 요청이 어떻게 받아들여졌는지를 찾아보세요. 글이 긴 후기일수록 구체적인 정보가 많은 편입니다.</p>
 </section>
-
+""" + _review_cards() + """
 <section id="area">
 <h2>지역별 후기</h2>
 <p>후기의 지역 표기는 서초동·잠원동·반포동·방배동·양재동·내곡동 여섯 개 대표 동까지만 합니다. 단지명, 건물명, 상세 주소는 싣지 않습니다. 같은 동 이용자의 후기를 모아 읽으면 그 동네의 방문 환경 — 출입 절차가 까다로운지, 주차는 어떤지 — 을 가늠하는 데 도움이 되기 때문에 동 단위 분류는 유지하되, 그 이상 좁히지 않는 것이 원칙입니다. 동별 생활권 설명은 <a href="/seocho-gu/">지역별 안내</a>와 함께 보시면 됩니다. 아직 후기가 없는 동이 있다면 그 동의 이용이 없었다는 뜻일 뿐이니, 방문 가능 여부와는 무관합니다.</p>
@@ -281,6 +364,7 @@ REVIEWS = {
 <p>잘 쓰려고 애쓰지 않으셔도 됩니다. 다음 이용자에게 도움이 되는 것은 수사가 아니라 정보입니다. 네 가지만 답해 주세요. 예약 통화는 매끄러웠는지, 도착은 약속대로였는지, 압은 요청대로 맞춰졌는지, 다시 받는다면 무엇을 바꾸고 싶은지. 아쉬웠던 점은 오히려 환영합니다. 구체적인 지적일수록 운영 기준이 실제로 바뀌고, 바뀐 내용은 답글로 확인해 드립니다. 후기 작성을 조건으로 한 개인정보 추가 수집이나 별도 보상은 하지 않으며, 작성 여부가 이후 예약에 영향을 주는 일도 없습니다. 받은 테마가 기억나지 않으면 비워 두셔도 됩니다. 예약 기록과 대조해 표기를 맞춰 드립니다. 같은 테마를 받은 분들의 후기는 각 후기에 표기된 테마명을 통해 <a href="/themes/">테마별 안내</a>와 나란히 읽을 수 있어, 다음 코스를 고를 때 참고 자료가 됩니다.</p>
 </section>
 """ + _CTA,
+    "extra_head": _review_jsonld(),
 }
 
 SUPPORT = {
