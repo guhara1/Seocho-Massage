@@ -1,10 +1,16 @@
 User-agent: *
 Allow: /
 
-User-agent: Yeti
-Allow: /
-
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://seocho-massage.pages.dev/sitemap.xml
+User-agent: Yeti
+Allow: /
+
+User-agent: Daumoa
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://seocho-massage.netlify.app/sitemap.xml

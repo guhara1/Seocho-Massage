@@ -11,7 +11,7 @@ Indexing API와 달리 페이지 유형 제한이 없는 정식 방법이므로 
 설정 (google_indexing.py와 같은 서비스 계정을 공유):
   1. Google Cloud 프로젝트에서 "Google Search Console API" 활성화
   2. 서비스 계정 생성 → JSON 키 다운로드 → service_account.json 로 저장 (커밋 금지!)
-  3. Search Console 속성(https://seocho-massage.pages.dev/)에
+  3. Search Console 속성(https://seocho-massage.netlify.app/)에
      서비스 계정 이메일을 '소유자' 권한으로 추가
   4. pip install google-auth requests
 

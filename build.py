@@ -9,6 +9,7 @@ content/ 패키지의 페이지 정의를 읽어 정적 HTML을 저장소 루트
   - 지역+역+테마 조합 경로는 생성 자체가 불가능한 구조
 """
 import html
+import json
 import os
 import re
 import sys
@@ -18,12 +19,220 @@ from xml.sax.saxutils import escape
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from content import PAGES
+from content.info import AGG_RATING_COUNT, AGG_RATING_VALUE
 from content.site import (BASE_URL, BRAND, INDEXNOW_KEY, NAV, PHONE, PHONE_DISPLAY)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MIN_INDEX_CHARS = 2000
 KST = timezone(timedelta(hours=9))
 TODAY = date.today().isoformat()
+BASE = BASE_URL.rstrip("/")
+PRICE_LOW, PRICE_HIGH, PRICE_COUNT = "90000", "180000", "3"
+
+
+# ── 내부링크 강화용 데이터 ──────────────────────────────────────────────
+def _nav_children(top_href):
+    for _label, href, children in NAV:
+        if href == top_href:
+            return [(c_label, c_href) for c_label, c_href in children
+                    if "#" not in c_href and c_href != top_href]
+    return []
+
+
+AREA_LINKS = _nav_children("/seocho-gu/")          # 대표 동 6곳
+STATION_LINKS = _nav_children("/seocho-gu/stations/")  # 역 21곳
+THEME_LINKS = _nav_children("/themes/")            # 테마 14개
+
+# 지역(동) 롱테일 주제 — 메인·관련링크 공용
+AREA_LONGTAIL = {
+    "/seocho-gu/seocho-dong/": "서초동 법조타운·강남대로 심야 출장마사지",
+    "/seocho-gu/jamwon-dong/": "잠원동 한강변 운동 후 회복 홈타이",
+    "/seocho-gu/banpo-dong/": "반포동 고속터미널·호텔 출장 홈타이",
+    "/seocho-gu/bangbae-dong/": "방배동 주택가 정기 방문 마사지",
+    "/seocho-gu/yangjae-dong/": "양재동 기업 사옥·야근 후 출장마사지",
+    "/seocho-gu/naegok-dong/": "내곡동 청계산 등산 후 회복 마사지",
+}
+AREA_SUB = {
+    "/seocho-gu/seocho-dong/": "야근·법원 인근 호텔 방문 조건",
+    "/seocho-gu/jamwon-dong/": "러닝·라이딩 후 하체 회복 안내",
+    "/seocho-gu/banpo-dong/": "터미널·호텔 객실 방문 안내",
+    "/seocho-gu/bangbae-dong/": "단독·빌라 정기 방문 안내",
+    "/seocho-gu/yangjae-dong/": "사옥·출장 숙소 야간 방문",
+    "/seocho-gu/naegok-dong/": "신축 단지·산행 회복 안내",
+}
+
+
+def render_related(path):
+    """지역·역·테마 상세 페이지 하단에 들어가는 롱테일 교차링크 블록.
+    번호 매겨진 본문 섹션과 구분하기 위해 <nav>로 출력한다."""
+    p = "/" + path
+
+    # 대표 동 지역 페이지 — 롱테일 카드 강조
+    is_dong = path.startswith("seocho-gu/") and "/stations/" not in path \
+        and path != "seocho-gu/" and p in AREA_LONGTAIL
+    if is_dong:
+        cards = "".join(
+            f'<a href="{href}"><strong>{AREA_LONGTAIL[href]}</strong>'
+            f'<span>{AREA_SUB[href]}</span></a>'
+            for _label, href in AREA_LINKS if href != p
+        )
+        return (
+            '<nav class="related" aria-label="서초구 다른 지역 안내">'
+            '<p class="related-title">서초구 다른 지역도 함께 보세요</p>'
+            f'<div class="longtail-grid">{cards}</div>'
+            '<p class="related-more">'
+            '<a href="/seocho-gu/">서초구 전체 지역 안내</a>'
+            ' · <a href="/seocho-gu/stations/">지하철역별 안내</a>'
+            ' · <a href="/themes/">테마별 관리 안내</a></p></nav>'
+        )
+
+    # 역 상세 페이지 — 인접 역 메시 + 지역 롱테일
+    if "/stations/" in path and path != "seocho-gu/stations/":
+        sibs = [(l, h) for l, h in STATION_LINKS if h != p]
+        idx = next((i for i, (l, h) in enumerate(STATION_LINKS) if h == p), 0)
+        rotated = sibs[idx:] + sibs[:idx]
+        cells = "".join(f'<li><a href="{h}">{l}</a></li>' for l, h in rotated)
+        area_more = " · ".join(
+            f'<a href="{h}">{AREA_LONGTAIL[h].split()[0]}</a>' for _l, h in AREA_LINKS
+        )
+        return (
+            '<nav class="related" aria-label="가까운 역·지역 안내">'
+            '<p class="related-title">가까운 역·지역 안내 더 보기</p>'
+            f'<ul class="card-grid">{cells}</ul>'
+            f'<p class="related-more">지역으로 찾기: {area_more}'
+            ' · <a href="/seocho-gu/">전체 지역</a></p></nav>'
+        )
+
+    # 테마 상세 페이지 — 다른 테마 메시 + 지역 롱테일
+    if path.startswith("themes/") and path != "themes/":
+        sibs = [(l, h) for l, h in THEME_LINKS if h != p]
+        idx = next((i for i, (l, h) in enumerate(THEME_LINKS) if h == p), 0)
+        rotated = sibs[idx:] + sibs[:idx]
+        cells = "".join(f'<li><a href="{h}">{l}</a></li>' for l, h in rotated)
+        area_more = " · ".join(
+            f'<a href="{h}">{AREA_LONGTAIL[h].split()[0]}</a>' for _l, h in AREA_LINKS
+        )
+        return (
+            '<nav class="related" aria-label="다른 테마·지역 안내">'
+            '<p class="related-title">다른 테마·지역 안내</p>'
+            f'<ul class="card-grid">{cells}</ul>'
+            f'<p class="related-more">지역별 안내: {area_more}'
+            ' · <a href="/themes/">전체 테마</a></p></nav>'
+        )
+
+    return ""
+
+
+def inject_related(body, path):
+    """관련 링크 블록을 본문 끝 CTA 앞에 삽입한다."""
+    block = render_related(path)
+    if not block:
+        return body
+    marker = '<section class="cta">'
+    i = body.rfind(marker)
+    if i != -1:
+        return body[:i] + block + "\n" + body[i:]
+    return body + "\n" + block
+
+
+# ── 구조화 데이터(JSON-LD) ─────────────────────────────────────────────
+def _clean(text):
+    text = re.sub(r"<[^>]+>", "", text)
+    return re.sub(r"\s+", " ", html.unescape(text)).strip()
+
+
+def extract_faqs(body):
+    pairs = re.findall(
+        r'<div class="faq-item">\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>', body, flags=re.S
+    )
+    return [(_clean(q), _clean(a)) for q, a in pairs]
+
+
+def _org_node():
+    return {
+        "@type": "HealthAndBeautyBusiness",
+        "@id": f"{BASE}/#org",
+        "name": BRAND,
+        "url": f"{BASE}/",
+        "telephone": PHONE,
+        "image": f"{BASE}/assets/og-image.png",
+        "logo": f"{BASE}/assets/icon-512.png",
+        "priceRange": "₩90,000 - ₩180,000",
+        "openingHours": "Mo-Su 00:00-24:00",
+        "areaServed": {"@type": "AdministrativeArea", "name": "서울특별시 서초구"},
+        "address": {"@type": "PostalAddress", "addressLocality": "서초구",
+                    "addressRegion": "서울특별시", "addressCountry": "KR"},
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": AGG_RATING_VALUE,
+            "reviewCount": AGG_RATING_COUNT,
+            "bestRating": "5",
+            "worstRating": "1",
+        },
+    }
+
+
+def _website_node():
+    return {
+        "@type": "WebSite",
+        "@id": f"{BASE}/#website",
+        "url": f"{BASE}/",
+        "name": BRAND,
+        "inLanguage": "ko",
+        "publisher": {"@id": f"{BASE}/#org"},
+    }
+
+
+def is_service_page(path):
+    return (path.startswith("seocho-gu/") or path.startswith("themes/")
+            or path in ("massage/", "courses/"))
+
+
+def build_jsonld(page, canonical, body):
+    path = page["path"]
+    crumbs = page.get("breadcrumb") or []
+    graph = [_org_node(), _website_node()]
+
+    # 빵부스러기(BreadcrumbList) — 하위 경로가 있는 페이지
+    if crumbs:
+        items = [{"@type": "ListItem", "position": 1, "name": "홈", "item": f"{BASE}/"}]
+        for n, (label, href) in enumerate(crumbs, start=2):
+            item = f"{BASE}{href}" if href else canonical
+            items.append({"@type": "ListItem", "position": n,
+                          "name": _clean(label), "item": item})
+        graph.append({"@type": "BreadcrumbList",
+                      "@id": canonical + "#breadcrumb", "itemListElement": items})
+
+    # FAQ — 본문에 faq-item이 있으면 자동 수집
+    faqs = extract_faqs(body)
+    if faqs:
+        graph.append({
+            "@type": "FAQPage", "@id": canonical + "#faq",
+            "mainEntity": [
+                {"@type": "Question", "name": q,
+                 "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        })
+
+    # Service — 지역·역·테마·출장마사지·코스 페이지
+    if is_service_page(path):
+        graph.append({
+            "@type": "Service", "@id": canonical + "#service",
+            "name": _clean(page["h1"]),
+            "serviceType": "출장마사지·홈타이 방문 관리",
+            "provider": {"@id": f"{BASE}/#org"},
+            "areaServed": {"@type": "AdministrativeArea", "name": "서울특별시 서초구"},
+            "url": canonical,
+            "offers": {"@type": "AggregateOffer", "priceCurrency": "KRW",
+                       "lowPrice": PRICE_LOW, "highPrice": PRICE_HIGH,
+                       "offerCount": PRICE_COUNT},
+        })
+
+    data = {"@context": "https://schema.org", "@graph": graph}
+    return ('<script type="application/ld+json">\n'
+            + json.dumps(data, ensure_ascii=False, indent=2)
+            + "\n</script>\n")
 
 
 def text_length(body_html: str) -> int:
@@ -125,8 +334,12 @@ def render_page(page: dict) -> str:
         else '<meta name="robots" content="index,follow">'
     )
     canonical = BASE_URL.rstrip("/") + "/" + path
+    # 구조화 데이터(JSON-LD) 자동 주입 + 페이지 고유 스키마(extra_head) 유지
+    extra_head = build_jsonld(page, canonical, body) + extra_head
+    # 롱테일 교차링크 블록 삽입
+    body = inject_related(body, path)
     naver_verify = (
-        '<meta name="naver-site-verification" content="df5bec35098ab32a0966a642b5bf46eda1c37dcf">\n'
+        '<meta name="naver-site-verification" content="9c20cdc0db9c377a61bc188e5bd1494bd8234667">\n'
         if path == ""
         else ""
     )
@@ -311,11 +524,24 @@ def build() -> None:
     with open(os.path.join(ROOT, "404.html"), "w", encoding="utf-8") as f:
         f.write(NOT_FOUND)
 
-    # sitemap.xml (lastmod 포함 — 빌드 날짜 기준)
-    urls = "\n".join(
-        f"  <url><loc>{u}</loc><lastmod>{TODAY}</lastmod></url>"
-        for u in sitemap_urls
-    )
+    # sitemap.xml (lastmod·changefreq·priority 포함 — 색인 우선순위 신호)
+    def _sm_hint(u):
+        rel = u[len(BASE):].strip("/")          # "" 또는 "seocho-gu/banpo-dong"
+        if rel == "":
+            return "daily", "1.0"
+        depth = rel.count("/")
+        if depth == 0 or rel in ("seocho-gu/stations",):
+            return "weekly", "0.8"               # 허브 페이지
+        return "weekly", "0.6"                   # 상세 페이지
+
+    rows = []
+    for u in sitemap_urls:
+        freq, pri = _sm_hint(u)
+        rows.append(
+            f"  <url><loc>{u}</loc><lastmod>{TODAY}</lastmod>"
+            f"<changefreq>{freq}</changefreq><priority>{pri}</priority></url>"
+        )
+    urls = "\n".join(rows)
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(
             '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -359,12 +585,14 @@ def build() -> None:
             + "\n</channel>\n</rss>\n"
         )
 
-    # robots.txt — 네이버(Yeti)·구글(Googlebot) 명시 허용 + sitemap
+    # robots.txt — 주요 검색봇 전체 허용 + sitemap (색인 속도 우선)
     with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(
             "User-agent: *\nAllow: /\n\n"
-            "User-agent: Yeti\nAllow: /\n\n"
-            "User-agent: Googlebot\nAllow: /\n\n"
+            "User-agent: Googlebot\nAllow: /\n\n"        # 구글
+            "User-agent: Yeti\nAllow: /\n\n"             # 네이버
+            "User-agent: Daumoa\nAllow: /\n\n"           # 다음(카카오)
+            "User-agent: Bingbot\nAllow: /\n\n"          # 빙
             f"Sitemap: {BASE_URL.rstrip('/')}/sitemap.xml\n"
         )
 

@@ -40,7 +40,7 @@ jobs:
         if: steps.check.outputs.ok == 'true'
         run: printf '%s' "$SA_JSON" > service_account.json
 
-      - name: Wait for Cloudflare Pages deploy
+      - name: Wait for Netlify deploy
         if: steps.check.outputs.ok == 'true'
         run: sleep 90
 

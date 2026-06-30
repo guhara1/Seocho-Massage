@@ -1,5 +1,5 @@
 # 사이트 공통 설정
-BASE_URL = "https://seocho-massage.pages.dev"
+BASE_URL = "https://seocho-massage.netlify.app"
 
 BRAND = "간다GO"
 PHONE = "0508-202-4719"
